@@ -2,12 +2,13 @@ import json
 
 class presupuesto():
     def __init__(self, monto_total):
-        self.monto_total = monto_total
+        self.monto_total = int(monto_total)
         self.categorias = {
         }
 
     def registrar_abono(self, monto):
         self.monto_total += monto
+
 
     def registrar_gasto(self, cat, monto):
         if cat in self.categorias:
@@ -38,8 +39,7 @@ class presupuesto():
     def asignar_monto(self, cat, monto):
         if cat in self.categorias:
             self.categorias[cat] = monto
-            if (cat.lower() == "ahorro"):
-                self.monto_total -= monto
+            
         else:
             print("Categoria Inexistente")
             
@@ -59,6 +59,18 @@ class presupuesto():
         }
         with open("presupuesto.json", "w") as archivo:
             json.dump(datos, archivo)
+    
+    def monto_libre(self, moonto_libre = 0):
+        suma_asignada = 0
+        for x in self.categorias:
+            suma_asignada += self.categorias[x]
+        monto_libre = self.monto_total - suma_asignada
+        return monto_libre
+    
+    def borrar_asignaciones_categoria(self, cat):
+        self.categorias[cat] = 0
+
+
 
 
 

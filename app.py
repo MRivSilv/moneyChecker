@@ -1,148 +1,104 @@
-import customtkinter as ctk
+import os
+import sys
+import time
 from model import presupuesto
 
-ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("blue")
+# Colores para la terminal
+class Color:
+    AZUL = '\033[94m'
+    VERDE = '\033[92m'
+    ROJO = '\033[91m'
+    AMARILLO = '\033[93m'
+    NEGRILLA = '\033[1m'
+    FIN = '\033[0m'
 
-p = presupuesto(0)
-p.cargar()
+def limpiar_pantalla():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-app = ctk.CTk()
-app.geometry("1000x650")
-app.title("Gestor de Presupuesto")
+def mostrar_menu(p):
+    limpiar_pantalla()
+    print(f"{Color.AZUL}{Color.NEGRILLA}=== GESTOR DE PRESUPUESTO ==={Color.FIN}")
+    print(f"Saldo Total: {Color.VERDE}${p.monto_total}{Color.FIN}")
+    print(f"Saldo sin asignar: {Color.AZUL}${p.monto_libre()}{Color.FIN}")
+    print("-" * 30)
+    
+    # Mostrar categorías
+    if p.categorias:
+        print(f"{Color.NEGRILLA}Categorías:{Color.FIN}")
+        for cat, monto in p.categorias.items():
+            color_cat = Color.VERDE if monto >= 0 else Color.ROJO
+            print(f" • {cat.capitalize()}: {color_cat}${monto}{Color.FIN}")
+    else:
+        print(f"{Color.AMARILLO}No hay categorías registradas.{Color.FIN}")
+    
+    print("-" * 30)
+    print("1. Registrar Abono")
+    print("2. Registrar Gasto")
+    print("3. Gestionar Categorías (Añadir/Eliminar)")
+    print("4. Asignar Monto a Categoría")
+    print("4. Borrar Asignacion")
+    print("5. Salir")
+    print("-" * 30)
 
-# ---------------- CONFIG GRID ---------------- #
+def main():
+    # Inicializar la lógica de tu model.py
+    p = presupuesto(0)
+    p.cargar()
 
-app.grid_columnconfigure((0, 1, 2), weight=1)
-app.grid_rowconfigure(1, weight=1)
-app.grid_rowconfigure(3, weight=1)
+    while True:
+        mostrar_menu(p)
+        opcion = input(f"{Color.AMARILLO}Selecciona una opción: {Color.FIN}")
 
-# ---------------- FUNCIONES ---------------- #
+        if opcion == '1':
+            try:
+                monto = int(input("Monto del abono: "))
+                p.registrar_abono(monto)
+                p.guardar()
+                print(f"{Color.VERDE}¡Abono registrado!{Color.FIN}")
+                time.sleep(1)
+            except ValueError:
+                print(f"{Color.ROJO}Error: Ingresa un número válido.{Color.FIN}")
+                time.sleep(2)
 
-def actualizar_total():
-    label_total.configure(text=f"Total disponible: ${p.monto_total}")
+        elif opcion == '2':
+            cat = input("Categoría del gasto: ").lower()
+            try:
+                monto = int(input("Monto del gasto: "))
+                p.registrar_gasto(cat, monto)
+                p.guardar()
+                time.sleep(1)
+            except ValueError:
+                print(f"{Color.ROJO}Monto inválido.{Color.FIN}")
+                time.sleep(2)
 
-def actualizar_lista():
-    lista_categorias.delete("0.0", "end")
-    for cat, monto in p.categorias.items():
-        lista_categorias.insert("end", f"{cat}: ${monto}\n")
+        elif opcion == '3':
+            print("\n1. Añadir categoría\n2. Eliminar categoría")
+            sub = input("Selecciona: ")
+            nombre = input("Nombre de la categoría: ").lower()
+            if sub == '1':
+                p.agregar_categoria(nombre)
+            elif sub == '2':
+                p.eliminar_categoria(nombre)
+            p.guardar()
 
-def registrar_abono():
-    try:
-        monto = float(entry_abono.get())
-        p.registrar_abono(monto)
-        entry_abono.delete(0, "end")
-        actualizar_total()
-    except:
-        pass
+        elif opcion == '4':
+            cat = input("Categoría: ").lower()
+            try:
+                monto = int(input("Monto a asignar: "))
+                p.asignar_monto(cat, monto)
+                p.guardar()
+            except ValueError:
+                print(f"{Color.ROJO}Error en el monto.{Color.FIN}")
+                time.sleep(2)
 
-def registrar_gasto():
-    cat = entry_gasto_cat.get().strip().lower()
-    try:
-        monto = float(entry_gasto_monto.get())
-        p.registrar_gasto(cat, monto)
-        entry_gasto_monto.delete(0, "end")
-        actualizar_total()
-        actualizar_lista()
-    except:
-        pass
+        elif opcion == '5':
+            print(f"{Color.AZUL}¡Guardado! Saliendo...{Color.FIN}")
+            p.guardar()
+            break
+        
+        else:
+            print(f"{Color.ROJO}Opción no válida.{Color.FIN}")
+            time.sleep(1)
 
-def agregar_categoria():
-    cat = entry_categoria.get().strip().lower()
-    if cat:
-        p.agregar_categoria(cat)
-        entry_categoria.delete(0, "end")
-        actualizar_lista()
-
-def eliminar_categoria():
-    cat = entry_categoria.get().strip().lower()
-    p.eliminar_categoria(cat)
-    entry_categoria.delete(0, "end")
-    actualizar_lista()
-
-def asignar_monto_categoria():
-    cat = entry_categoria.get().strip().lower()
-    try:
-        monto = float(entry_asignar_monto.get())
-        p.asignar_monto(cat, monto)
-        entry_asignar_monto.delete(0, "end")
-        actualizar_total()
-        actualizar_lista()
-    except:
-        pass
-
-def cerrar_app():
-    p.guardar()
-    app.destroy()
-
-# ---------------- TITULO ---------------- #
-
-titulo = ctk.CTkLabel(app, text="GESTOR DE PRESUPUESTO", font=("Arial", 24))
-titulo.grid(row=0, column=0, columnspan=3, pady=20)
-
-# ---------------- COLUMNA 1 - ABONO ---------------- #
-
-frame_abono = ctk.CTkFrame(app)
-frame_abono.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
-
-ctk.CTkLabel(frame_abono, text="Registrar Abono", font=("Arial", 18)).pack(pady=15)
-
-entry_abono = ctk.CTkEntry(frame_abono, placeholder_text="Monto")
-entry_abono.pack(pady=10)
-
-ctk.CTkButton(frame_abono, text="Agregar", command=registrar_abono).pack(pady=10)
-
-# ---------------- COLUMNA 2 - GASTO ---------------- #
-
-frame_gasto = ctk.CTkFrame(app)
-frame_gasto.grid(row=1, column=1, padx=20, pady=20, sticky="nsew")
-
-ctk.CTkLabel(frame_gasto, text="Registrar Gasto", font=("Arial", 18)).pack(pady=15)
-
-entry_gasto_cat = ctk.CTkEntry(frame_gasto, placeholder_text="Categoria")
-entry_gasto_cat.pack(pady=5)
-
-entry_gasto_monto = ctk.CTkEntry(frame_gasto, placeholder_text="Monto")
-entry_gasto_monto.pack(pady=5)
-
-ctk.CTkButton(frame_gasto, text="Registrar", command=registrar_gasto).pack(pady=10)
-
-# ---------------- COLUMNA 3 - CATEGORIAS ---------------- #
-
-frame_categoria = ctk.CTkFrame(app)
-frame_categoria.grid(row=1, column=2, padx=20, pady=20, sticky="nsew")
-
-ctk.CTkLabel(frame_categoria, text="Categorias", font=("Arial", 18)).pack(pady=15)
-
-entry_categoria = ctk.CTkEntry(frame_categoria, placeholder_text="Nombre categoria")
-entry_categoria.pack(pady=5)
-
-ctk.CTkButton(frame_categoria, text="Agregar", command=agregar_categoria).pack(pady=5)
-ctk.CTkButton(frame_categoria, text="Eliminar", command=eliminar_categoria).pack(pady=5)
-
-entry_asignar_monto = ctk.CTkEntry(frame_categoria, placeholder_text="Monto a asignar")
-entry_asignar_monto.pack(pady=10)
-
-ctk.CTkButton(frame_categoria, text="Asignar Monto", command=asignar_monto_categoria).pack(pady=5)
-
-# ---------------- INFO INFERIOR ---------------- #
-
-label_total = ctk.CTkLabel(app, text="", font=("Arial", 20))
-label_total.grid(row=2, column=0, columnspan=3, pady=10)
-
-lista_categorias = ctk.CTkTextbox(app, height=150)
-lista_categorias.grid(row=3, column=0, columnspan=3, padx=40, pady=10, sticky="nsew")
-
-# ---------------- BOTON SALIR ---------------- #
-
-ctk.CTkButton(app, text="Guardar y Salir", command=cerrar_app).grid(
-    row=4, column=0, columnspan=3, pady=15
-)
-
-# ---------------- INIT ---------------- #
-
-actualizar_total()
-actualizar_lista()
-
-app.protocol("WM_DELETE_WINDOW", cerrar_app)
-app.mainloop()
+if __name__ == "__main__":
+    main()

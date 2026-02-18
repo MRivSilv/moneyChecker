@@ -1,2 +1,2 @@
-presupuesto.json
-__pycache__
+*.json
+__pycache__/

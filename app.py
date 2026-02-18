@@ -26,6 +26,11 @@ SUBMENU_CATEGORIAS = [
     'Eliminar categoría',
 ]
 
+SI_NO = [
+    'SI',
+    'NO',
+]
+
 def limpiar_pantalla():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -215,13 +220,17 @@ def main():
             break
 
         elif opcion == '7':
-            print(f"Borrando tu presupuesto por completo\n")
-            p.nuke_json()
-            time.sleep(2)
-            print("Reinicie app para volver a usar\n")
-            time.sleep(2)
-            break
-        
+            sub = seleccionar_con_flechas("¿Esta seguro de seguir?", SI_NO)
+            if sub == "SI":
+                print(f"Borrando tu presupuesto por completo\n")
+                time.sleep(2)
+                p.nuke_json()
+                time.sleep(2)
+                print("Reinicie app para volver a usar\n")
+                time.sleep(2)
+                break
+            elif sub == "NO":
+                True  
         else:
             print(f"{Color.ROJO}Opción no válida.{Color.FIN}")
             time.sleep(1)

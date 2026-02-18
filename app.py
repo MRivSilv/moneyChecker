@@ -38,6 +38,7 @@ def mostrar_menu(p):
     print("4. Asignar Monto a Categoría")
     print("5. Borrar Asignacion")
     print("6. Salir")
+    print("7. Borrar presupuesto")
     print("-" * 30)
 
 def main():
@@ -104,6 +105,14 @@ def main():
         elif opcion == '6':
             print(f"{Color.AZUL}¡Guardado! Saliendo...{Color.FIN}")
             p.guardar()
+            break
+
+        elif opcion == '7':
+            print(f"Borrando tu presupuesto por completo\n")
+            p.nuke_json()
+            time.sleep(2)
+            print("Reinicie app para volver a usar\n")
+            time.sleep(2)
             break
         
         else:

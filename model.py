@@ -1,5 +1,6 @@
 import json
 import time
+from pathlib import Path
 
 class presupuesto():
     def __init__(self, monto_total):
@@ -93,6 +94,13 @@ class presupuesto():
             self.categorias[cat] = 0
         else:
             print(f"Categoria {cat} no existe")
+    
+    def nuke_json(self):
+        ruta = Path("presupuesto.json")
+        if ruta.exists() and ruta.is_file():
+            ruta.unlink()
+        else:
+            print("ERROR\n")
 
 
 

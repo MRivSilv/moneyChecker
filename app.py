@@ -36,8 +36,8 @@ def mostrar_menu(p):
     print("2. Registrar Gasto")
     print("3. Gestionar Categorías (Añadir/Eliminar)")
     print("4. Asignar Monto a Categoría")
-    print("4. Borrar Asignacion")
-    print("5. Salir")
+    print("5. Borrar Asignacion")
+    print("6. Salir")
     print("-" * 30)
 
 def main():
@@ -61,7 +61,7 @@ def main():
                 time.sleep(2)
 
         elif opcion == '2':
-            cat = input("Categoría del gasto: ").lower()
+            cat = input("Categoría del gasto: ").capitalize()
             try:
                 monto = int(input("Monto del gasto: "))
                 p.registrar_gasto(cat, monto)
@@ -74,7 +74,7 @@ def main():
         elif opcion == '3':
             print("\n1. Añadir categoría\n2. Eliminar categoría")
             sub = input("Selecciona: ")
-            nombre = input("Nombre de la categoría: ").lower()
+            nombre = input("Nombre de la categoría: ").capitalize()
             if sub == '1':
                 p.agregar_categoria(nombre)
             elif sub == '2':
@@ -82,7 +82,7 @@ def main():
             p.guardar()
 
         elif opcion == '4':
-            cat = input("Categoría: ").lower()
+            cat = input("Categoría: ").capitalize()
             try:
                 monto = int(input("Monto a asignar: "))
                 p.asignar_monto(cat, monto)
@@ -90,8 +90,18 @@ def main():
             except ValueError:
                 print(f"{Color.ROJO}Error en el monto.{Color.FIN}")
                 time.sleep(2)
-
+        
         elif opcion == '5':
+            cat = input("Categoria: ").capitalize()
+            try:
+                p.borrar_asignaciones_categoria(cat)
+                p.guardar()
+            except ValueError:
+                print(f"Categoria {cat} no existe")
+                time.sleep(2)
+
+
+        elif opcion == '6':
             print(f"{Color.AZUL}¡Guardado! Saliendo...{Color.FIN}")
             p.guardar()
             break

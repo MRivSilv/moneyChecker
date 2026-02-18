@@ -112,7 +112,3 @@ Carga y guardado:
 ## Ideas de siguientes pasos
 
 - Agregar reporte mensual y resumen por categoría.
-- Exportar movimientos a CSV.
-- Añadir tests unitarios para `model.py`.
-- Integrar confirmación `Sí/No` antes de borrar presupuesto.
-
